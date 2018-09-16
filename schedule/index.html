@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Schedule</title>
+		<link rel="stylesheet" type="text/css" href="main.css"/>
+		<link rel="SHORTCUT ICON" href="favicon.ico"/>
+	</head>
+	<div id="wrapper">
+		<header>
+			<h1 id="currentTime">--:--:--</h1>
+		</header>
+		<div id="progressBarWrapper">
+			<div id="progressBar">&nbsp;Hourly Progress</div>
+		</div>
+		<body>
+			<div id = content>Loading...</div>
+			<hr>
+			<div id="mySections">
+			</div>
+			<hr>
+			<div id="searchWrapper">
+				<button onclick="showHideSearchArea()" id="toggleHidden">Show Search</button>
+				<br/>
+				<div id="courseSearch">
+					Days are 0-6 corresponding with Sunday-Saturday<br />
+					Search Courses:
+					<input id="subj" type="search" onkeyup="updateResults(this.value)"/>
+				</div>
+				<table id="searchResults"></table>
+			</div>
+			<script src="main.js"></script>
+		</body>
+	</div>
+</html>

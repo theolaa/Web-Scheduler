@@ -1,0 +1,68 @@
+
+var noclass = {
+    name: "No Class",
+    day: "-----",
+    start: "--:--",
+    finish: "--:--",
+    location: "-----"
+}
+
+var classes = [
+
+    cmns251 = {
+        name: "CMNS 251",
+        day: 1,
+        start: "14:30",
+        finish: "17:20",
+        location: "CH A2207"
+    },
+
+    fren102_1 = {
+        name: "FREN 102",
+        day: 2,
+        start: "10:00",
+        finish: "10:55",
+        location: "AB D238"
+    },
+
+    fren102_2 = {
+        name: "FREN 102",
+        day: 2,
+        start: "13:00",
+        finish: "14:20",
+        location: "AB D238"
+    },
+
+    cis285 = {
+        name: "CIS 285",
+        day: 3,
+        start: "19:00",
+        finish: "21:50",
+        location: "AB D242"
+    },
+
+    cis270 = {
+        name: "CIS 270",
+        day: 4,
+        start: "08:30",
+        finish: "11:20",
+        location: "AB D242"
+    },
+
+    fren102_3 = {
+        name: "FREN 102",
+        day: 4,
+        start: "13:00",
+        finish: "14:20",
+        location: "AB B161"
+    },
+
+    testClass = {
+        name: "Test Class Good!",
+        day: 0,
+        start: "13:55",
+        finish: "14:14",
+        location: "AB B161"
+    }
+
+]
