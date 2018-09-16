@@ -1,3 +1,4 @@
+var currentClass
 var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
@@ -24,17 +25,25 @@ var testSection = {
   sectionId:"AB1",
   teacher:"Me",
   location:"Somewhere",
-  days:"3",
-  start:"2212",
-  finish:"2213"
+  days:"6",
+  start:"2322",
+  finish:"2323"
 }
 
 var sections = [
 ]
 
 var mySections = [
-  //testSection
+  testSection
 ]
+
+function sts() {
+  testSection.days = prompt("Enter Days: ")
+  testSection.start = prompt("Enter Start: ")
+  testSection.finish = prompt("Enter Finish: ")
+  updateMySections()
+  return "Test Section Updated"
+}
 
 function initializeSections() {
 	for (i = 0; i < masterList.length; i++) {
@@ -111,7 +120,12 @@ function updateMySections() {
   mySectionsArea.innerHTML = ""
   for (i = 0; i < mySections.length; i++) {
 	 result = generateCourseHTML(mySections[i], false)
-	 mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
+   if (mySections[i] == currentClass) {
+     mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: red;'>" + result + "</div>"
+   }
+	 else {
+     mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
+   }
   }
 }
 
@@ -174,12 +188,17 @@ function generateCourseHTML(section, isHeader) {
 
 function update() {
 
+  d = new Date()
 	document.getElementById("wrapper").style.width = window.innerWidth * 0.99 + "px"
+  progressBar.style.width = ((d.getMinutes() * 60 + d.getSeconds()) / 3600) * 100 + "%"
+  clock.innerHTML = d.getHours() + ":" +
+    ((parseInt(d.getMinutes()) < 10) ? "0" + d.getMinutes() : d.getMinutes()) + ":" +
+    ((parseInt(d.getSeconds()) < 10) ? "0" + d.getSeconds() : d.getSeconds())
 
-	d = new Date();
+  if (fallsWithinRange(d, currentClass) && currentClass.crn != "-----") return
 
-	var currentClass = blankSection
-  var result
+  currentClass = blankSection
+
 	for (i = 0; i < mySections.length; i++) {
 		if (fallsWithinRange(d, mySections[i])) {
 			currentClass = mySections[i]
@@ -187,16 +206,11 @@ function update() {
 		}
 	}
 
-  result = generateCourseHTML(currentClass, true)
+  var result = generateCourseHTML(currentClass, true)
 
-	clock.innerHTML = d.getHours() + ":" +
-		((parseInt(d.getMinutes()) < 10) ? "0" + d.getMinutes() : d.getMinutes()) + ":" +
-		((parseInt(d.getSeconds()) < 10) ? "0" + d.getSeconds() : d.getSeconds())
-	content.innerHTML = result
+  content.innerHTML = result
 
-	progressBar.style.width = ((d.getMinutes() * 60 + d.getSeconds()) / 3600) * 100 + "%"
-
-
+  updateMySections()
 
 }
 
@@ -258,7 +272,8 @@ function showHideSearchArea() {
 
 function begin() {
   startTime = new Date().getTime()
-	initializeSections()
+  currentClass = blankSection
+  initializeSections()
   sortSections()
   loadSavedSections()
 	update()
