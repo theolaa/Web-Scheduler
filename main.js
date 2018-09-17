@@ -125,6 +125,29 @@ function removeFromMySections(crn) {
   updateCookie()
 }
 
+function setNextClass() {
+  sortSectionsToDisplay()
+  var d = new Date()
+  var container = {
+    days:d.getDay().toString(),
+    start:d.getHours() + "" + d.getMinutes()
+  }
+  var currentMinutes = convertToMinutes(container)
+
+  for (i = 0; i < sectionsToDisplay.length; i++) {
+    if (convertToMinutes(sectionsToDisplay[i]) > currentMinutes) {
+      if (i == mySections.length-1) {
+        nextClass = sectionsToDisplay[0]
+        return
+      } else {
+        nextClass = sectionsToDisplay[i]
+        return
+      }
+    }
+  }
+  console.log("Next Class Not Set")
+}
+
 function updateMySections() {
 
   sectionsToDisplay = []
@@ -143,17 +166,12 @@ function updateMySections() {
 	 result = generateCourseHTML(sectionsToDisplay[i], false)
    if (sectionsToDisplay[i] == currentClass) {
      mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
-     if (currentClass != sectionsToDisplay[sectionsToDisplay.length-1]) {
-       nextClass = sectionsToDisplay[i+1]
-     } else {
-       nextClass = sectionsToDisplay[0]
-     }
    }
 	 else {
      mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
    }
   }
-
+  setNextClass()
 }
 
 function addMultiDayClass(course) {
@@ -265,10 +283,13 @@ function update() {
 	}
 
   updateMySections()
+  setNextClass()
 
   var result = generateCourseHTML(currentClass, true)
 
   content.innerHTML = result
+  result = generateCourseHTML(nextClass, true)
+  content.innerHTML += "<br>" + result
 
 }
 
