@@ -35,7 +35,7 @@ var sections = [
 ]
 
 var mySections = [
-  //testSection
+  testSection
 ]
 
 var sectionsToDisplay = [
@@ -232,11 +232,12 @@ function convertToMinutes(course) {
 
 function generateCourseHTML(section, isHeader) {
 
-	result = "Class: " + section.name +
-		"<br>Day: " + getDaysOfWeek(section) +
-		"<br>Start: " + section.start +
-		"<br>Finish: " + section.finish +
-		"<br>Location: " + section.location
+  if (section.crn == "-----") return "No Class Currently"
+
+	result = section.subj + " " + section.name +
+    "<br>" + section.sectionId +
+    "<br>" + getDaysOfWeek(section) + section.start + " - " + section.finish +
+		"<br>" + section.location
     + ((isHeader) ? "" : " <br><br><span class='remove' onmouseup='removeFromMySections("+section.crn+")'>[remove]</span>")
 
 	return result
@@ -259,10 +260,11 @@ function update() {
 	for (i = 0; i < mySections.length; i++) {
 		if (fallsWithinRange(d, mySections[i])) {
 			currentClass = mySections[i]
-      updateMySections()
 			break
 		}
 	}
+
+  updateMySections()
 
   var result = generateCourseHTML(currentClass, true)
 
@@ -316,6 +318,7 @@ function showHideSearchArea() {
 		results.style.visibility = "visible"
 		search.style.visibility = "visible"
 		button.innerHTML = "Hide Search"
+    document.getElementById("subj").focus()
 	} else {
 		results.style.visibility = "hidden"
 		search.style.visibility = "hidden"

@@ -3,6 +3,10 @@
 	font-family: verdana;
 }
 
+#content {
+	margin-top: 20px;
+}
+
 body {
 	color: #7CB232;
 	margin-top: 0px;
@@ -48,7 +52,7 @@ td {
 	font-size: 8pt;
 	display: inline-block;
 	border: 2px solid #7CB232;
-	padding: 3px;
+	padding: 7px;
 	margin: 5px;
 }
 
