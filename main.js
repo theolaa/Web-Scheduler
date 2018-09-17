@@ -1,4 +1,5 @@
 var currentClass
+var nextClass
 var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
@@ -34,7 +35,10 @@ var sections = [
 ]
 
 var mySections = [
-  testSection
+  //testSection
+]
+
+var sectionsToDisplay = [
 ]
 
 function sts() {
@@ -73,7 +77,6 @@ function loadSavedSections() {
     }
   }
   updateMySections()
-  //alert(mySections.length)
 }
 
 function updateCookie() {
@@ -91,17 +94,24 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
-function addToMySections(crn) {
+function addToMySections(crn, dontUpdate) {
   var temp
-  for (i=0; i<sections.length;i++) {
+  for (i = 0; i < mySections.length; i++) {
+    if (mySections[i].crn == crn) {
+      alert("You've already added that class")
+      return
+    }
+  }
+
+  for (i = 0; i < sections.length; i++) {
     if (sections[i].crn == crn) {
       temp = sections[i]
+      mySections.push(temp)
+      if (!dontUpdate) updateCookie()
       break
     }
   }
-  mySections.push(temp)
   updateMySections()
-  updateCookie()
 }
 
 function removeFromMySections(crn) {
@@ -116,16 +126,53 @@ function removeFromMySections(crn) {
 }
 
 function updateMySections() {
-  sortMySections()
-  mySectionsArea.innerHTML = ""
+
+  sectionsToDisplay = []
   for (i = 0; i < mySections.length; i++) {
-	 result = generateCourseHTML(mySections[i], false)
-   if (mySections[i] == currentClass) {
-     mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: red;'>" + result + "</div>"
+    if (mySections[i].days.length > 1) {
+      var temp = mySections[i]
+      addMultiDayClass(temp)
+    } else {
+      sectionsToDisplay.push(mySections[i])
+    }
+  }
+
+  sortSectionsToDisplay()
+  mySectionsArea.innerHTML = ""
+  for (i = 0; i < sectionsToDisplay.length; i++) {
+	 result = generateCourseHTML(sectionsToDisplay[i], false)
+   if (sectionsToDisplay[i] == currentClass) {
+     mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
+     if (currentClass != sectionsToDisplay[sectionsToDisplay.length-1]) {
+       nextClass = sectionsToDisplay[i+1]
+     } else {
+       nextClass = sectionsToDisplay[0]
+     }
    }
 	 else {
      mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
    }
+  }
+
+}
+
+function addMultiDayClass(course) {
+  var noOfDays = course.days.length
+  var i = 0
+  while (i < noOfDays) {
+    var temp = {
+      crn:course.crn,
+      subj:course.subj,
+      name:course.name,
+      sectionId:course.sectionId,
+      teacher:course.teacher,
+      location:course.location,
+      days:course.days.charAt(i),
+      start:course.start,
+      finish:course.finish
+    }
+    sectionsToDisplay.push(temp)
+    i++
   }
 }
 
@@ -158,19 +205,29 @@ function sortSections() {
 	} while (swapped);
 }
 
-function sortMySections() {
+function sortSectionsToDisplay() {
   var swapped;
 	do {
 		swapped = false;
-		for (var i = 0; i < mySections.length - 1; i++) {
-			if (parseInt(mySections[i].days.charAt(0)) > parseInt(mySections[i + 1].days.charAt(0))) {
-				var temp = mySections[i];
-				mySections[i] = mySections[i + 1];
-				mySections[i + 1] = temp;
+		for (var i = 0; i < sectionsToDisplay.length - 1; i++) {
+			if (convertToMinutes(sectionsToDisplay[i]) > convertToMinutes(sectionsToDisplay[i + 1])) {
+				var temp = sectionsToDisplay[i];
+				sectionsToDisplay[i] = sectionsToDisplay[i + 1];
+				sectionsToDisplay[i + 1] = temp;
 				swapped = true;
 			}
 		}
 	} while (swapped);
+}
+
+function convertToMinutes(course) {
+
+  day = parseInt(course.days.charAt(0))
+  hours = parseInt(course.start.substring(0, 2))
+  minutes = parseInt(course.start.substring(2))
+
+  return (day*1440) + (hours*60) + minutes
+
 }
 
 function generateCourseHTML(section, isHeader) {
@@ -202,6 +259,7 @@ function update() {
 	for (i = 0; i < mySections.length; i++) {
 		if (fallsWithinRange(d, mySections[i])) {
 			currentClass = mySections[i]
+      updateMySections()
 			break
 		}
 	}
@@ -209,8 +267,6 @@ function update() {
   var result = generateCourseHTML(currentClass, true)
 
   content.innerHTML = result
-
-  updateMySections()
 
 }
 
@@ -244,7 +300,7 @@ function updateResults(query) {
     sections[i].days + "</td><td>" +
     sections[i].start + "</td><td>" +
     sections[i].finish + "</td><td>" +
-    "<button onclick='addToMySections(" +sections[i].crn+ ")'>Add</button></td></tr>")
+    "<button onclick='addToMySections(" +sections[i].crn+ ", false)'>Add</button></td></tr>")
   }
 
   results = document.getElementById("searchResults").innerHTML = tableHeader+HTMLToReturn
@@ -273,12 +329,13 @@ function showHideSearchArea() {
 function begin() {
   startTime = new Date().getTime()
   currentClass = blankSection
+  nextClass = blankSection
   initializeSections()
   sortSections()
   loadSavedSections()
+  console.log("Setup completed in " + (new Date().getTime() - startTime) + "ms")
 	update()
 	setInterval(update, 1000)
-  console.log("Setup completed in " + (new Date().getTime() - startTime) + "ms")
 }
 
 var masterList = [
