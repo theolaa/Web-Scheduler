@@ -1,6 +1,10 @@
+var previousClass
 var currentClass
 var nextClass
 var timeToNextClass
+var currentTime
+
+//HTML Elements
 var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
@@ -36,7 +40,7 @@ var sections = [
 ]
 
 var mySections = [
-  testSection
+  //testSection
 ]
 
 var sectionsToDisplay = [
@@ -113,6 +117,8 @@ function addToMySections(crn, dontUpdate) {
     }
   }
   updateMySections()
+  setInitialNextClass()
+  updateNextClass()
 }
 
 function removeFromMySections(crn) {
@@ -123,35 +129,57 @@ function removeFromMySections(crn) {
     }
   }
   updateMySections()
+  setInitialNextClass()
+  updateNextClass()
   updateCookie()
 }
 
 function updateNextClass() {
+  console.log("updating next class")
   sortSectionsToDisplay()
-  var d = new Date()
-  var container = {
-    days:d.getDay().toString(),
-    start:d.getHours() + "" + d.getMinutes()
-  }
-  var currentMinutes = convertToMinutes(container)
-
   for (i = 0; i < sectionsToDisplay.length; i++) {
-    courseMinutes = convertToMinutes(sectionsToDisplay[i])
-    if (courseMinutes > currentMinutes) {
-      if (i == mySections.length-1) {
+    if (currentClass == sectionsToDisplay[i]) {
+      if (i == sectionsToDisplay.length-1) {
         nextClass = sectionsToDisplay[0]
       } else {
-        nextClass = sectionsToDisplay[i]
+        nextClass = sectionsToDisplay[i+1]
       }
-      getTimeString(courseMinutes-currentMinutes)
-      return
+      break
     }
   }
-  console.log("Next Class Not Set")
+}
+
+function updateTimeToNextClass() {
+  var currentMinutes = convertToMinutes({days:currentTime.getDay().toString(), start:currentTime.getHours() + "" + currentTime.getMinutes(), finish:"0000"})
+  var nextClassMinutes
+  if (nextClass != undefined) {
+     nextClassMinutes = convertToMinutes(nextClass)
+     if (nextClassMinutes.start - currentMinutes.start <= 0) {
+       timeToNextClass = (nextClassMinutes.start + 10080) - currentMinutes.start
+     } else {
+       timeToNextClass = nextClassMinutes.start - currentMinutes.start
+     }
+  } else {
+    timeToNextClass = "Unkown"
+  }
+}
+
+function setInitialNextClass() {
+  sortSectionsToDisplay()
+  var d = new Date()
+  var currentMinutes = convertToMinutes({days:d.getDay().toString(), start:d.getHours() + "" + d.getMinutes(), finish:"0000"})
+  nextClass = undefined
+  for (i = 0; i < sectionsToDisplay.length; i++) {
+    if (convertToMinutes(sectionsToDisplay[i]).start > currentMinutes.start) {
+      nextClass = sectionsToDisplay[i]
+      break
+    } else {
+      nextClass = sectionsToDisplay[0]
+    }
+  }
 }
 
 function updateMySections() {
-
   sectionsToDisplay = []
   for (i = 0; i < mySections.length; i++) {
     if (mySections[i].days.length > 1) {
@@ -229,7 +257,7 @@ function sortSectionsToDisplay() {
 	do {
 		swapped = false;
 		for (var i = 0; i < sectionsToDisplay.length - 1; i++) {
-			if (convertToMinutes(sectionsToDisplay[i]) > convertToMinutes(sectionsToDisplay[i + 1])) {
+			if (convertToMinutes(sectionsToDisplay[i]).start > convertToMinutes(sectionsToDisplay[i + 1]).start) {
 				var temp = sectionsToDisplay[i];
 				sectionsToDisplay[i] = sectionsToDisplay[i + 1];
 				sectionsToDisplay[i + 1] = temp;
@@ -242,30 +270,32 @@ function sortSectionsToDisplay() {
 function convertToMinutes(course) {
 
   day = parseInt(course.days.charAt(0))
-  hours = parseInt(course.start.substring(0, 2))
-  minutes = parseInt(course.start.substring(2))
+  startHours = parseInt(course.start.substring(0, 2))
+  startMinutes = parseInt(course.start.substring(2))
+  endHours = parseInt(course.finish.substring(0, 2))
+  endMinutes = parseInt(course.finish.substring(2))
 
-  return (day*1440) + (hours*60) + minutes
+  return {start:(day*1440) + (startHours*60) + startMinutes,end:(day*1440) + (endHours*60) + endMinutes}
 
 }
 
 function getTimeString(totalMinutes) {
   var days, hours, minutes
-  if (totalMinutes >= 0) {
+  if (totalMinutes > 59) {
     days = Math.floor(totalMinutes/1440)
     totalMinutes -= days*1440
     hours = Math.floor(totalMinutes/60)
     totalMinutes -= hours*60
     minutes = totalMinutes
-    console.log("Days: " + days + " Hours: " + hours + " Minutes: " + minutes)
+    return (days + " Days, " + hours + " hours, " + minutes + " minutes.")
   } else {
-    console.log(totalMinutes)
+    return (totalMinutes + " minutes.")
   }
 }
 
 function generateCourseHTML(section, isHeader) {
 
-  if (section.crn == "-----") return "No Class Currently"
+  if (section == undefined) return "<br>No Class Currently<br><br><br>"
 
 	result = section.subj + " " + section.name +
     "<br>" + section.sectionId +
@@ -278,45 +308,45 @@ function generateCourseHTML(section, isHeader) {
 }
 
 function update() {
-  updateNextClass()
-  d = new Date()
+  currentTime = new Date()
 	document.getElementById("wrapper").style.width = window.innerWidth * 0.99 + "px"
-  progressBar.style.width = ((d.getMinutes() * 60 + d.getSeconds()) / 3600) * 100 + "%"
-  clock.innerHTML = d.getHours() + ":" +
-    ((parseInt(d.getMinutes()) < 10) ? "0" + d.getMinutes() : d.getMinutes()) + ":" +
-    ((parseInt(d.getSeconds()) < 10) ? "0" + d.getSeconds() : d.getSeconds())
+  progressBar.style.width = ((currentTime.getMinutes() * 60 + currentTime.getSeconds()) / 3600) * 100 + "%"
+  clock.innerHTML = currentTime.getHours() + ":" +
+    ((parseInt(currentTime.getMinutes()) < 10) ? "0" + currentTime.getMinutes() : currentTime.getMinutes()) + ":" +
+    ((parseInt(currentTime.getSeconds()) < 10) ? "0" + currentTime.getSeconds() : currentTime.getSeconds())
 
-  if (fallsWithinRange(d, currentClass) && currentClass.crn != "-----") return
-
-  currentClass = blankSection
-
-	for (i = 0; i < mySections.length; i++) {
-		if (fallsWithinRange(d, mySections[i])) {
-			currentClass = mySections[i]
-			break
-		}
-	}
-
+  if (currentClass == undefined || !fallsWithinRange(currentClass)) {
+    if (currentClass != undefined) {
+      previousClass = currentClass
+    }
+    currentClass = undefined
+    for (i = 0; i < sectionsToDisplay.length; i++) {
+      if (fallsWithinRange(sectionsToDisplay[i])) {
+        currentClass = sectionsToDisplay[i]
+        updateNextClass()
+        break
+      }
+    }
+    var result = generateCourseHTML(currentClass, true)
+    content.innerHTML = "<div id='currentClass'>CURRENT CLASS:<br>" + result + "</div>"
+    var result = generateCourseHTML(nextClass, true)
+    content.innerHTML += "<div id='nextClass'>NEXT CLASS:<br>" + result + "</div> Starts in " + getTimeString(timeToNextClass)
+  }
+  updateTimeToNextClass()
   updateMySections()
-
-  var result = generateCourseHTML(currentClass, true)
-
-  content.innerHTML = result
-  result = generateCourseHTML(nextClass, true)
-  content.innerHTML += "<br>" + result
-
 }
 
 // d is the current date, c is the class being tested
-function fallsWithinRange(d, c) {
+function fallsWithinRange(c) {
 
   // Skips the rest of evaluation if the day isn't even right
-  if (!c.days.includes(d.getDay())) return false
+  if (!c.days.includes(currentTime.getDay())) return false
 
-  startTime = parseInt(c.start.substring(0, 2))*60 + parseInt(c.start.substring(2))
-  endTime = parseInt(c.finish.substring(0, 2))*60 + parseInt(c.finish.substring(2))
-  currentTime = d.getHours()*60 + d.getMinutes()
-  if (currentTime >= startTime && currentTime < endTime) return true
+  startTime = convertToMinutes(c).start
+  endTime = convertToMinutes(c).end
+  var currentMinutes = (currentTime.getDay()*1440) + (currentTime.getHours()*60) + currentTime.getMinutes()
+  //console.log(startTime + " " + endTime + " " + currentMinutes)
+  if (currentMinutes >= startTime && currentMinutes < endTime) return true
 
   return false
 
@@ -334,7 +364,7 @@ function updateResults(query) {
     sections[i].name + "</td><td>" +
     sections[i].teacher + "</td><td>" +
     sections[i].location + "</td><td>" +
-    sections[i].days + "</td><td>" +
+    getDaysOfWeek(sections[i]) + "</td><td>" +
     sections[i].start + "</td><td>" +
     sections[i].finish + "</td><td>" +
     "<button onclick='addToMySections(" +sections[i].crn+ ", false)'>Add</button></td></tr>")
@@ -366,11 +396,10 @@ function showHideSearchArea() {
 
 function begin() {
   startTime = new Date().getTime()
-  currentClass = blankSection
-  nextClass = blankSection
   initializeSections()
   sortSections()
   loadSavedSections()
+  setInitialNextClass()
   console.log("Setup completed in " + (new Date().getTime() - startTime) + "ms")
 	update()
 	setInterval(update, 1000)
