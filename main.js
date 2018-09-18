@@ -1,5 +1,6 @@
 var currentClass
 var nextClass
+var timeToNextClass
 var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
@@ -125,7 +126,7 @@ function removeFromMySections(crn) {
   updateCookie()
 }
 
-function setNextClass() {
+function updateNextClass() {
   sortSectionsToDisplay()
   var d = new Date()
   var container = {
@@ -135,14 +136,15 @@ function setNextClass() {
   var currentMinutes = convertToMinutes(container)
 
   for (i = 0; i < sectionsToDisplay.length; i++) {
-    if (convertToMinutes(sectionsToDisplay[i]) > currentMinutes) {
+    courseMinutes = convertToMinutes(sectionsToDisplay[i])
+    if (courseMinutes > currentMinutes) {
       if (i == mySections.length-1) {
         nextClass = sectionsToDisplay[0]
-        return
       } else {
         nextClass = sectionsToDisplay[i]
-        return
       }
+      getTimeString(courseMinutes-currentMinutes)
+      return
     }
   }
   console.log("Next Class Not Set")
@@ -171,7 +173,6 @@ function updateMySections() {
      mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
    }
   }
-  setNextClass()
 }
 
 function addMultiDayClass(course) {
@@ -248,6 +249,20 @@ function convertToMinutes(course) {
 
 }
 
+function getTimeString(totalMinutes) {
+  var days, hours, minutes
+  if (totalMinutes >= 0) {
+    days = Math.floor(totalMinutes/1440)
+    totalMinutes -= days*1440
+    hours = Math.floor(totalMinutes/60)
+    totalMinutes -= hours*60
+    minutes = totalMinutes
+    console.log("Days: " + days + " Hours: " + hours + " Minutes: " + minutes)
+  } else {
+    console.log(totalMinutes)
+  }
+}
+
 function generateCourseHTML(section, isHeader) {
 
   if (section.crn == "-----") return "No Class Currently"
@@ -263,7 +278,7 @@ function generateCourseHTML(section, isHeader) {
 }
 
 function update() {
-
+  updateNextClass()
   d = new Date()
 	document.getElementById("wrapper").style.width = window.innerWidth * 0.99 + "px"
   progressBar.style.width = ((d.getMinutes() * 60 + d.getSeconds()) / 3600) * 100 + "%"
@@ -283,7 +298,6 @@ function update() {
 	}
 
   updateMySections()
-  setNextClass()
 
   var result = generateCourseHTML(currentClass, true)
 
