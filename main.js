@@ -9,6 +9,15 @@ var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
 var mySectionsArea = document.getElementById("mySections")
+var daysOfWeek = [
+  document.getElementById("sunday"),
+  document.getElementById("monday"),
+  document.getElementById("tuesday"),
+  document.getElementById("wednesday"),
+  document.getElementById("thursday"),
+  document.getElementById("friday"),
+  document.getElementById("saturday")
+]
 
 var searchHidden = true
 
@@ -191,14 +200,16 @@ function updateMySections() {
   }
 
   sortSectionsToDisplay()
-  mySectionsArea.innerHTML = ""
+
+  for (i = 0; i < daysOfWeek.length; i++) daysOfWeek[i].innerHTML = ""
+
   for (i = 0; i < sectionsToDisplay.length; i++) {
 	 result = generateCourseHTML(sectionsToDisplay[i], false)
    if (sectionsToDisplay[i] == currentClass) {
-     mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
+     daysOfWeek[sectionsToDisplay[i].days].innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
    }
 	 else {
-     mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
+     daysOfWeek[sectionsToDisplay[i].days].innerHTML += "<div class='mySectionResult'>" + result + "</div>"
    }
   }
 }
@@ -287,7 +298,7 @@ function getTimeString(totalMinutes) {
     hours = Math.floor(totalMinutes/60)
     totalMinutes -= hours*60
     minutes = totalMinutes
-    return (days + " Days, " + hours + " hours, " + minutes + " minutes.")
+    return (((days > 0) ? days + " Days, " : "") + ((hours > 0) ? hours + " hours, " : "") + minutes + " minutes.")
   } else {
     return (totalMinutes + " minutes.")
   }
@@ -330,7 +341,7 @@ function update() {
     var result = generateCourseHTML(currentClass, true)
     content.innerHTML = "<div id='currentClass'>CURRENT CLASS:<br>" + result + "</div>"
     var result = generateCourseHTML(nextClass, true)
-    content.innerHTML += "<div id='nextClass'>NEXT CLASS:<br>" + result + "</div> Starts in " + getTimeString(timeToNextClass)
+    content.innerHTML += "<div id='nextClass'>NEXT CLASS:<br>" + result + "</div> Next class starts in " + getTimeString(timeToNextClass)
   }
   updateTimeToNextClass()
   updateMySections()
