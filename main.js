@@ -9,15 +9,6 @@ var content = document.getElementById("content")
 var clock = document.getElementById("currentTime")
 var progressBar = document.getElementById("progressBar")
 var mySectionsArea = document.getElementById("mySections")
-var daysOfWeek = [
-  document.getElementById("sunday"),
-  document.getElementById("monday"),
-  document.getElementById("tuesday"),
-  document.getElementById("wednesday"),
-  document.getElementById("thursday"),
-  document.getElementById("friday"),
-  document.getElementById("saturday")
-]
 
 var searchHidden = true
 
@@ -168,9 +159,7 @@ function updateTimeToNextClass() {
      } else {
        timeToNextClass = nextClassMinutes.start - currentMinutes.start
      }
-  } else {
-    timeToNextClass = "Unkown"
-  }
+   }
 }
 
 function setInitialNextClass() {
@@ -189,6 +178,9 @@ function setInitialNextClass() {
 }
 
 function updateMySections() {
+
+  // Creates an arry of sections representing each individual class sessions
+  // and then sorts them chronologically
   sectionsToDisplay = []
   for (i = 0; i < mySections.length; i++) {
     if (mySections[i].days.length > 1) {
@@ -198,20 +190,18 @@ function updateMySections() {
       sectionsToDisplay.push(mySections[i])
     }
   }
-
   sortSectionsToDisplay()
 
-  for (i = 0; i < daysOfWeek.length; i++) daysOfWeek[i].innerHTML = ""
-
+  mySectionsArea.innerHTML = ""
   for (i = 0; i < sectionsToDisplay.length; i++) {
 	 result = generateCourseHTML(sectionsToDisplay[i], false)
    if (sectionsToDisplay[i] == currentClass) {
-     daysOfWeek[sectionsToDisplay[i].days].innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
+     mySectionsArea.innerHTML += "<div class='mySectionResult' style='border-color: orange;'>" + result + "</div>"
    }
 	 else {
-     daysOfWeek[sectionsToDisplay[i].days].innerHTML += "<div class='mySectionResult'>" + result + "</div>"
+     mySectionsArea.innerHTML += "<div class='mySectionResult'>" + result + "</div>"
    }
-  }
+ }
 }
 
 function addMultiDayClass(course) {
@@ -291,6 +281,7 @@ function convertToMinutes(course) {
 }
 
 function getTimeString(totalMinutes) {
+  if (totalMinutes == undefined || totalMinutes == NaN) return "Unknown"
   var days, hours, minutes
   if (totalMinutes > 59) {
     days = Math.floor(totalMinutes/1440)
@@ -308,10 +299,10 @@ function generateCourseHTML(section, isHeader) {
 
   if (section == undefined) return "<br>No Class Currently<br><br><br>"
 
-	result = section.subj + " " + section.name +
-    "<br>" + section.sectionId +
+	result = "<span class='title' data-tooltip='" + section.crn + ": " +  section.name + "'>" + section.subj + " " + section.sectionId + "</span> "+
     "<br>" + getDaysOfWeek(section) + section.start + " - " + section.finish +
-		"<br>" + section.location
+		"<br>" + section.location +
+    "<br>" + section.teacher
     + ((isHeader) ? "" : " <br><br><span class='remove' onmouseup='removeFromMySections("+section.crn+")'>[remove]</span>")
 
 	return result
@@ -335,16 +326,17 @@ function update() {
       if (fallsWithinRange(sectionsToDisplay[i])) {
         currentClass = sectionsToDisplay[i]
         updateNextClass()
+        updateMySections()
         break
       }
     }
     var result = generateCourseHTML(currentClass, true)
     content.innerHTML = "<div id='currentClass'>CURRENT CLASS:<br>" + result + "</div>"
     var result = generateCourseHTML(nextClass, true)
-    content.innerHTML += "<div id='nextClass'>NEXT CLASS:<br>" + result + "</div> Next class starts in " + getTimeString(timeToNextClass)
+    content.innerHTML += "<div id='nextClass'>NEXT CLASS:<br>" + result + "</div>"
+    document.getElementById("progressText").innerHTML = "Next Class in " + getTimeString(timeToNextClass)
   }
   updateTimeToNextClass()
-  updateMySections()
 }
 
 // d is the current date, c is the class being tested
