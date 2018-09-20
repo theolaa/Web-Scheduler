@@ -24,16 +24,6 @@ td {
 	border-color: #7CB232;
 }
 
-span.title:hover::before {
-	display: block;
-	background-color: #7CB232;
-	color: white;
-	position: absolute;
-	padding: 5px;
-	content: attr(data-tooltip);
-	border: 2px solid #181818;
-}
-
 #currentTime {
 	background-color: #00703C;
 	text-align: center;
@@ -59,23 +49,15 @@ span.title:hover::before {
 	text-align: center;
 }
 
-#progressText {
-	display: block;
-	position: relative;
-	top: -100%;
-	text-align: center;
-	font-size: 80%;
-}
-
 #currentClass {
-	border: 2px solid #7CB232;
+	border: 1px solid green;
 	display: inline-block;
 	margin: 5px;
 	padding: 3px;
 }
 
 #nextClass {
-	border: 2px solid #7CB232;
+	border: 1px solid green;
 	display: inline-block;
 	margin: 5px;
 	padding: 3px;
@@ -83,7 +65,8 @@ span.title:hover::before {
 
 #mySections{
 	overflow: auto;
-  white-space: nowrap;
+  white-space:nowrap;
+  width: auto;
 }
 
 .dayOfWeek {
@@ -106,12 +89,6 @@ span.title:hover::before {
 	border: 2px solid #7CB232;
 	padding: 7px;
 	margin: 5px;
-	width: 150px;
-	float: left;
-}
-
-.mySectionResult:hover {
-	background-color: #181818;
 }
 
 .remove {
